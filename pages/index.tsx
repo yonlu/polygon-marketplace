@@ -2,22 +2,27 @@ import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3Modal from 'web3modal';
+import Image from 'next/image';
 
-import { nftaddress, nftmarketaddress } from '../.config';
+import { nftaddress, nftmarketaddress } from '../config';
 
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json';
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
 
+import type { MarketItem, Metadata, LoadingState } from './types';
+
 export default function Home() {
-  const [nfts, setNfts] = useState([]);
-  const [loadingState, setLoadingState] = useState('not-loaded');
+  const [nfts, setNfts] = useState<MarketItem[]>([]);
+  const [loadingState, setLoadingState] = useState<LoadingState>('not-loaded');
 
   useEffect(() => {
     loadNFTs();
   }, []);
 
   async function loadNFTs() {
-    const provider = new ethers.providers.JsonRpcProvider();
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://polygon-mumbai.infura.io/v3/c78604f5f7f044a4b18203dec1257f5b'
+    );
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
     const marketContract = new ethers.Contract(
       nftmarketaddress,
@@ -26,19 +31,22 @@ export default function Home() {
     );
     const data = await marketContract.fetchMarketItems();
 
-    const items = await Promise.all(
-      data.map(async (i) => {
+    const items: MarketItem[] = await Promise.all(
+      data.map(async (i: MarketItem) => {
         const tokenUri = await tokenContract.tokenURI(i.tokenId);
-        const meta = await axios.get(tokenUri);
+        const { data: metadata } = (await axios.get(tokenUri)) as {
+          data: Metadata;
+        };
+
         let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
         let item = {
           price,
-          tokenId: i.tokenId.toNumber(),
+          tokenId: i.tokenId,
           seller: i.seller,
           owner: i.owner,
-          image: meta.data.image,
-          name: meta.data.name,
-          description: meta.data.description,
+          image: metadata.image,
+          name: metadata.name,
+          description: metadata.description,
         };
         return item;
       })
@@ -48,9 +56,9 @@ export default function Home() {
     setLoadingState('loaded');
   }
 
-  async function buyNft(nft) {
-    const web3modal = new Web3Modal();
-    const connection = await Web3Modal.connect();
+  async function buyNft(nft: MarketItem) {
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
     const provider = new ethers.providers.Web3Provider(connection);
 
     const signer = provider.getSigner();
@@ -80,7 +88,7 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
           {nfts.map((nft, i) => (
             <div key={i} className="border shadow rounded-xl overflow-hidden">
-              <img src={nft.image} alt="" />
+              <Image src={nft.image} width="438" height="246" alt="NFT Image" />
               <div className="p-4">
                 <p
                   style={{ height: '64px' }}

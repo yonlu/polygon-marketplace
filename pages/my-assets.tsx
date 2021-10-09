@@ -9,9 +9,11 @@ import { nftaddress, nftmarketaddress } from '../config';
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json';
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
 
+import type { MarketItem, Metadata, LoadingState } from './types';
+
 export default function MyAssets() {
-  const [nfts, setNfts] = useState([]);
-  const [loadingState, setLoadingState] = useState('not-loaded');
+  const [nfts, setNfts] = useState<MarketItem[]>([]);
+  const [loadingState, setLoadingState] = useState<LoadingState>('not-loaded');
 
   useEffect(() => {
     loadNFTs();
@@ -31,17 +33,20 @@ export default function MyAssets() {
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
     const data = await marketContract.fetchMyNFTs();
 
-    const items = await Promise.all(
-      data.map(async (i) => {
+    const items: MarketItem[] = await Promise.all(
+      data.map(async (i: MarketItem) => {
         const tokenUri = await tokenContract.tokenURI(i.tokenId);
-        const meta = await axios.get(tokenUri);
+        const { data: metadata } = (await axios.get(tokenUri)) as {
+          data: Metadata;
+        };
+
         let price = ethers.utils.formatUnits(i.price.toString(), 'ether');
         let item = {
           price,
-          tokenId: i.tokenId.toNumber(),
+          tokenId: i.tokenId,
           seller: i.seller,
           owner: i.owner,
-          image: meta.data.image,
+          image: metadata.image,
         };
         return item;
       })
