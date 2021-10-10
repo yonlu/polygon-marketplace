@@ -1,14 +1,34 @@
+import {
+  Box,
+  Image as ImageChakra,
+  Flex,
+  Stack,
+  VStack,
+  Heading,
+  Text,
+  Textarea,
+  Container,
+  Input,
+  Button,
+  SimpleGrid,
+  Avatar,
+  AvatarGroup,
+  useBreakpointValue,
+  IconProps,
+  Icon,
+} from '@chakra-ui/react';
 import { useState, ChangeEvent } from 'react';
 import { ethers } from 'ethers';
 import { create as ipfsHttpClient } from 'ipfs-http-client';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import Web3Modal from 'web3modal';
 
 import { nftaddress, nftmarketaddress } from '../config';
 
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json';
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
+
+import FileUpload from '../components/FileUpload';
 
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
 
@@ -90,46 +110,57 @@ export default function CreateItem() {
   }
 
   return (
-    <div className="flex justify-center">
-      <div className="w-1/2 flex flex-col pb-12">
-        <input
+    <Flex h="60vh" p="0 auto" justifyContent="space-evenly" alignItems="center">
+      <VStack spacing="24px">
+        <Input
           placeholder="Asset Name"
-          className="mt-8 border rounded p-4"
+          mt={8}
+          p={4}
           onChange={(e) =>
             updateFormInput({ ...formInput, name: e.target.value })
           }
         />
-        <textarea
+        <Textarea
           placeholder="Asset Description"
-          className="mt-2 border rounded p-4"
+          mt={8}
+          p={4}
           onChange={(e) =>
             updateFormInput({ ...formInput, description: e.target.value })
           }
         />
-        <input
+        <Input
           placeholder="Asset Price in Matic"
-          className="mt-2 border rounded p-4"
+          mt={8}
+          p={4}
           onChange={(e) =>
             updateFormInput({ ...formInput, price: e.target.value })
           }
         />
-        <input type="file" name="Asset" className="my-4" onChange={onChange} />
-        {fileUrl && (
-          <Image
-            src={fileUrl}
-            alt="uploaded preview"
-            width="350"
-            height="350"
-            className="rounded mt-4"
-          />
-        )}
-        <button
+        <Input type="file" name="Asset" my={4} onChange={onChange} />
+        <Button
           onClick={createItem}
+          fontWeight="bold"
+          w="100%"
+          mt={4}
+          p={4}
+          bg="purple.500"
+          color="white"
+          rounded="md"
+          shadow="lg"
           className="font-bold mt-4 bg-pink-500 text-white rounded p-4 shadow-lg"
         >
           Create Digital Asset
-        </button>
-      </div>
-    </div>
+        </Button>
+      </VStack>
+      {fileUrl && (
+        <ImageChakra
+          src={fileUrl}
+          alt="uploaded preview"
+          width="350"
+          height="350"
+          mt={4}
+        />
+      )}
+    </Flex>
   );
 }

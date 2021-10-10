@@ -1,13 +1,16 @@
+import { Flex, Grid, GridItem, LinkBox, Button } from '@chakra-ui/react';
+import Link from 'next/link';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3Modal from 'web3modal';
-import Image from 'next/image';
 
 import { nftaddress, nftmarketaddress } from '../config';
 
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json';
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
+
+import { NFT as NFTCard } from '../components/NFT';
 
 import type { MarketItem, Metadata, LoadingState } from './types';
 
@@ -20,9 +23,7 @@ export default function Home() {
   }, []);
 
   async function loadNFTs() {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'https://polygon-mumbai.infura.io/v3/c78604f5f7f044a4b18203dec1257f5b'
-    );
+    const provider = new ethers.providers.JsonRpcProvider();
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
     const marketContract = new ethers.Contract(
       nftmarketaddress,
@@ -30,6 +31,7 @@ export default function Home() {
       provider
     );
     const data = await marketContract.fetchMarketItems();
+    const tokenContractName = await tokenContract.name();
 
     const items: MarketItem[] = await Promise.all(
       data.map(async (i: MarketItem) => {
@@ -47,6 +49,7 @@ export default function Home() {
           image: metadata.image,
           name: metadata.name,
           description: metadata.description,
+          contractName: tokenContractName,
         };
         return item;
       })
@@ -83,38 +86,27 @@ export default function Home() {
   }
 
   return (
-    <div className="flex justify-center">
-      <div className="px-4" style={{ maxWidth: '1600px' }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-          {nfts.map((nft, i) => (
-            <div key={i} className="border shadow rounded-xl overflow-hidden">
-              <Image src={nft.image} width="438" height="246" alt="NFT Image" />
-              <div className="p-4">
-                <p
-                  style={{ height: '64px' }}
-                  className="text-2xl font-semibold"
-                >
-                  {nft.name}
-                </p>
-                <div style={{ height: '70px', overflow: 'hidden' }}>
-                  <p className="text-gray-400">{nft.description}</p>
-                </div>
-              </div>
-              <div className="p-4 bg-black">
-                <p className="text-2xl mb-4 font-bold text-white">
-                  {nft.price} Matic
-                </p>
-                <button
-                  className="w-full bg-pink-500 text-white font-bold py-2 px-12 rounded"
-                  onClick={() => buyNft(nft)}
-                >
-                  Buy
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <Flex justify="center" p={4}>
+      <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+        {nfts.map((nft, i) => (
+          <GridItem key={i}>
+            <Link href={`/${nft.tokenId}`} passHref>
+              <LinkBox as="a">
+                <NFTCard
+                  image={nft.image}
+                  name={nft.name}
+                  price={nft.price}
+                  tokenId={nft.tokenId}
+                  contractName={nft.contractName}
+                />
+              </LinkBox>
+            </Link>
+            <Button w="100%" onClick={() => buyNft(nft)}>
+              Buy now
+            </Button>
+          </GridItem>
+        ))}
+      </Grid>
+    </Flex>
   );
 }

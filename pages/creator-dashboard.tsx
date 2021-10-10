@@ -1,13 +1,28 @@
+import {
+  Flex,
+  Grid,
+  GridItem,
+  Icon,
+  LinkBox,
+  Tab,
+  Tabs,
+  TabList,
+  TabPanel,
+  TabPanels,
+} from '@chakra-ui/react';
+import Link from 'next/link';
+import { RiPencilFill, RiCurrencyFill } from 'react-icons/ri';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Web3Modal from 'web3modal';
-import Image from 'next/image';
 
 import { nftaddress, nftmarketaddress } from '../config';
 
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json';
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
+
+import { NFT as NFTCard } from '../components/NFT';
 
 import type { MarketItem, Metadata, LoadingState } from './types';
 
@@ -33,6 +48,7 @@ export default function CreatorDashboard() {
     );
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
     const data = await marketContract.fetchItemsCreated();
+    const tokenContractName = await tokenContract.name();
 
     const items: MarketItem[] = await Promise.all(
       data.map(async (i: MarketItem) => {
@@ -48,6 +64,8 @@ export default function CreatorDashboard() {
           owner: i.owner,
           sold: i.sold,
           image: metadata.image,
+          name: metadata.name,
+          contractName: tokenContractName,
         };
         return item;
       })
@@ -65,56 +83,67 @@ export default function CreatorDashboard() {
 
   return (
     <>
-      <div className="p-4">
-        <h2 className="text-2xl py-2">Items Created</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-          {nfts.map((nft, i) => (
-            <div key={i} className="border shadow rounded-xl overflow-hidden">
-              <Image
-                src={nft.image}
-                className="rounded"
-                width="438"
-                height="246"
-                alt="NFT created image"
-              />
-              <div className="p-4 bg-black">
-                <p className="text-2xl font-bold text-white">
-                  Price - {nft.price} Matic
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className="px-4">
-        {/* If there is no items sold, do NOT display  */}
-        {Boolean(sold.length) && (
-          <div>
-            <h2 className="text-2xl py-2">Items sold</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
-              {sold.map((nft, i) => (
-                <div
-                  key={i}
-                  className="border shadow rounded-xl overflow-hidden"
-                >
-                  <Image
-                    src={nft.image}
-                    className="rounded"
-                    width="438"
-                    height="246"
-                    alt="NFT sold image"
-                  />
-                  <div className="p-4 bg-black">
-                    <p className="text-2xl font-bold text-white">
-                      Price - {nft.price} Matic
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      <Tabs size="lg" colorScheme="brand">
+        <TabList mt="30px">
+          <Tab>
+            <Icon as={RiPencilFill} mr={2} />
+            Created
+          </Tab>
+          <Tab>
+            <Icon as={RiCurrencyFill} mr={2} />
+            Sold
+          </Tab>
+        </TabList>
+
+        <TabPanels>
+          <TabPanel>
+            <Flex justify="center">
+              <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                {nfts.map((nft, i) => (
+                  <GridItem key={i}>
+                    <Link href={`/${nft.tokenId}`} passHref>
+                      <LinkBox as="a">
+                        <NFTCard
+                          image={nft.image}
+                          name={nft.name}
+                          price={nft.price}
+                          tokenId={nft.tokenId}
+                          contractName={nft.contractName}
+                        />
+                      </LinkBox>
+                    </Link>
+                  </GridItem>
+                ))}
+              </Grid>
+            </Flex>
+          </TabPanel>
+
+          <TabPanel>
+            {/* If there is no items sold, do NOT display  */}
+            {Boolean(sold.length) && (
+              <Flex justify="center">
+                <Grid templateColumns="repeat(3, 1fr)" gap={4}>
+                  {sold.map((nft, i) => (
+                    <GridItem key={i}>
+                      <Link href={`/${nft.tokenId}`} passHref>
+                        <LinkBox as="a">
+                          <NFTCard
+                            image={nft.image}
+                            name={nft.name}
+                            price={nft.price}
+                            tokenId={nft.tokenId}
+                            contractName={nft.contractName}
+                          />
+                        </LinkBox>
+                      </Link>
+                    </GridItem>
+                  ))}
+                </Grid>
+              </Flex>
+            )}
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </>
   );
 }
