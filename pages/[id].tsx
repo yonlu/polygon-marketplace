@@ -34,7 +34,9 @@ export default function Token({ id }) {
   }, []);
 
   async function loadNFT(id) {
-    const provider = new ethers.providers.JsonRpcProvider();
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://polygon-mumbai.infura.io/v3/c78604f5f7f044a4b18203dec1257f5b'
+    );
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
     const marketContract = new ethers.Contract(
       nftmarketaddress,
@@ -74,9 +76,9 @@ export default function Token({ id }) {
   }
 
   return (
-    <Flex w="100vw" justifyContent="center" p={4}>
+    <>
       {nfts.map((nft, i) => (
-        <Flex key={i} w="100%" justifyContent="space-evenly">
+        <Grid key={i} w="100vw" p={4} templateColumns="repeat(2, 1fr)">
           <NFTCard
             image={nft.image}
             name={nft.name}
@@ -107,9 +109,9 @@ export default function Token({ id }) {
               </Flex>
             </Flex>
           </VStack>
-        </Flex>
+        </Grid>
       ))}
-    </Flex>
+    </>
   );
 }
 

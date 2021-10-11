@@ -77,24 +77,28 @@ export const Header = () => {
             color: 'gray.200',
           }}
         >
-          <MenuItem
-            h={14}
-            icon={<RiUserLine fontSize={20} />}
-            _hover={{
-              bg: 'gray.800',
-            }}
-          >
-            <Text>Profile</Text>
-          </MenuItem>
-          <MenuItem
-            h={14}
-            icon={<RiBookOpenLine fontSize={20} />}
-            _hover={{
-              bg: 'gray.800',
-            }}
-          >
-            <Text>My Collections</Text>
-          </MenuItem>
+          <Link href="/account" passHref>
+            <MenuItem
+              h={14}
+              icon={<RiUserLine fontSize={20} />}
+              _hover={{
+                bg: 'gray.800',
+              }}
+            >
+              <Text>Profile</Text>
+            </MenuItem>
+          </Link>
+          <Link href="/my-assets" passHref>
+            <MenuItem
+              h={14}
+              icon={<RiBookOpenLine fontSize={20} />}
+              _hover={{
+                bg: 'gray.800',
+              }}
+            >
+              <Text>My Collections</Text>
+            </MenuItem>
+          </Link>
           <MenuItem
             h={14}
             icon={<RiSettings2Line fontSize={20} />}

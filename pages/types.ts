@@ -7,6 +7,7 @@ export interface MarketItem {
   name: string;
   description: string;
   sold?: boolean;
+  contractName: string;
 }
 
 export interface Metadata {
