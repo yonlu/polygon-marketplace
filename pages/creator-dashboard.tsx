@@ -24,7 +24,7 @@ import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
 
 import { NFT as NFTCard } from '../components/NFT';
 
-import type { MarketItem, Metadata, LoadingState } from './types';
+import type { MarketItem, Metadata, LoadingState } from '../types/_types';
 
 export default function CreatorDashboard() {
   const [nfts, setNfts] = useState<MarketItem[]>([]);

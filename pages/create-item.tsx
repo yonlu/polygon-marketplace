@@ -1,25 +1,14 @@
 import {
-  Box,
   Image as ImageChakra,
   Flex,
-  Stack,
   VStack,
-  Heading,
-  Text,
   Textarea,
-  Container,
   Input,
   Button,
-  SimpleGrid,
-  Avatar,
-  AvatarGroup,
-  useBreakpointValue,
-  IconProps,
-  Icon,
 } from '@chakra-ui/react';
 import { useState, ChangeEvent } from 'react';
 import { ethers } from 'ethers';
-import { create as ipfsHttpClient } from 'ipfs-http-client';
+import { create } from 'ipfs-http-client';
 import { useRouter } from 'next/router';
 import Web3Modal from 'web3modal';
 
@@ -28,7 +17,12 @@ import { nftaddress, nftmarketaddress } from '../config';
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json';
 import Market from '../artifacts/contracts/NFTMarket.sol/NFTMarket.json';
 
-const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0');
+const client = create({
+  host: 'ipfs.infura.io',
+  port: 5001,
+  apiPath: '/api/v0',
+  protocol: 'https',
+});
 
 export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
